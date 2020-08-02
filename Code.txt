@@ -5,13 +5,13 @@ boolean lock=true;
 int counter=0; //counts the number of persons
 int light_status=10; //light status
 
-SoftwareSerial esp8266(3,4) //RX=3,TX=4
-#define ssid "FILL_IN_YOUR_SSID"
-#define pass "FILL_IN_YOUR_PASSWORD"
+SoftwareSerial esp8266(3,4); //RX=3,TX=4
+const char* ssid = "REPLACE_WITH_YOUR_SSID";
+const char* pass = "REPLACE_WITH_YOUR_PASSWORD";
 
-string sendAT(string command, const int timeout) //since sendAT function has to return response from ESP 8266 it reurns string type
+String sendAT(String command, const int timeout) //since sendAT function has to return response from ESP 8266 it reurns string type
 {
-  string response=" ";
+  String response=" ";
   esp8266.print(command); //sends AT Commands to the serial communication object esp8266
   unsigned long int time = millis(); //Returns the number of milliseconds passed since the Arduino began running the program.
   while ((time + timeout)>millis())
@@ -30,7 +30,7 @@ void connectWiFi() //establishes connection between Wi-Fi and esp8266
 {
   sendAT("AT\r\n",1000);
   sendAT("AT+CWMODE=1\r\n",1000); //call sendAT function to set esp8266 to station mode
-  sendAT("AT+CWJAP=\""ssid"\",\""pass"\"\r\n",1000);  //AT Command to connect with the Wi-Fi network
+  sendAT("AT+CWJAP=\"ssid"",\"pass""\r\n",1000);  //AT Command to connect with the Wi-Fi network
   while (!esp8266.find("OK"))
   {
     
@@ -67,7 +67,7 @@ void setup() {
 void loop() {
   data=digitalRead(10);
   data1=digitalRead(11);
-  if (data=HIGH && lock=true)
+  if (data==HIGH && lock==true)
   {
     lock=false;
     digitalWrite(12, HIGH);
@@ -83,7 +83,7 @@ void loop() {
     delay(4000);
     lock=true;
   }
-  if (data1=HIGH && lock=true)
+  if (data1==HIGH && lock==true)
   {
     lock=false;
     digitalWrite(12, HIGH);
@@ -103,29 +103,29 @@ void loop() {
 
 void passTS(int c, int l)
 {
-  string counter1= string(c); //convert integer variable to string type
+  String counter1= String(c); //convert integer variable to string type
   Serial.print("Number of persons: ");
   Serial.println(c);
   
-  string light_status1= string(l); //convert integer variable to string type
+  String light_status1= String(l); //convert integer variable to string type
   Serial.print("Light status: ");
   Serial.println(l);
-  updateTS(counter1, light_status1)
+  updateTS(counter1, light_status1);
   delay(3000);
 }
 
-void updateTS(string C, string L)
+void updateTS(String C, String L)
 {
   Serial.print(" ");
   sendAT("AT+CIPSTART=\"TCP\",\"api.thingspeak.com\"80\r\n",1000);
-  delay 2000;
-  string cmdlen;
-  string cmd="GET/update?key=*******&field1="+C+"&field2="+L+"\r\n";
+  delay(2000);
+  String cmdlen;
+  String cmd="GET/update?key=*******&field1="+C+"&field2="+L+"\r\n";
   cmdlen=cmd.length(); //length should be less than 2024 bytes
   sendAT("AT+CIPSEND="+cmdlen+"\r\n",2000);
   esp8266.print(cmd);
   Serial.println(" ");
   sendAT("AT+CIPCLOSE\r\n",2000);
-  serial.println("");
-  delay(2000)
+  Serial.println("");
+  delay(2000);
 }
